@@ -11,6 +11,7 @@ Created by NaderB - https://www.naderb.org
    - kartoshka-backend.exe   (downloader)
    - ffmpeg.exe              (optional but recommended for MP3 / merge)
 2. Run kartoshka-youtuber.exe
+   .NET does not need to be installed. Python does not need to be installed.
 3. Paste a YouTube URL (video or playlist / Mix)
 4. Click Get Info
 5. For playlists: select songs (or Select All), then Download Selected

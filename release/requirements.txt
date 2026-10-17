@@ -1,8 +1,6 @@
-# YouTube changes their API often — keep updated: pip install -U yt-dlp
-yt-dlp>=2026.3.13
-pyinstaller>=6.0.0
+# YouTube changes their API often — keep updated: pip install -U "yt-dlp[default]"
+# [default] installs yt-dlp-ejs, which solves YouTube's JavaScript challenges.
+yt-dlp[default]>=2026.8.19
+pyinstaller>=6.22.3
 ffmpeg-python>=0.2.0
-mutagen>=1.47.0
-
-
-
+mutagen>=1.48.1

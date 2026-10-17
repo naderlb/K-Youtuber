@@ -8,6 +8,7 @@ Created by NaderB - https://www.naderb.org
 import sys
 import json
 import os
+import shutil
 import time
 from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
@@ -39,6 +40,40 @@ def _safe_print(msg):
 
 def _safe_json(obj):
     _safe_print(json.dumps(obj, ensure_ascii=True))
+
+def _find_tool(name):
+    """Look for name.exe beside the app, then on PATH."""
+    exe = name + '.exe' if os.name == 'nt' else name
+    if getattr(sys, 'frozen', False):
+        base = os.path.dirname(sys.executable)
+    else:
+        base = os.path.dirname(os.path.abspath(__file__))
+    beside = os.path.join(base, exe)
+    if os.path.isfile(beside):
+        return beside
+    found = shutil.which(name)
+    if found and os.path.isfile(found):
+        return found
+    return None
+
+
+def _ydl_runtime(opts):
+    """Settings required by current yt-dlp for YouTube."""
+    opts.setdefault('compat_opts', ['no-certifi'])
+    runtimes = {}
+    deno = _find_tool('deno')
+    node = _find_tool('node')
+    if deno:
+        runtimes['deno'] = {'path': deno}
+    if node:
+        runtimes['node'] = {'path': node}
+    if runtimes:
+        opts['js_runtimes'] = runtimes
+    ffmpeg = _find_tool('ffmpeg')
+    if ffmpeg:
+        opts.setdefault('ffmpeg_location', os.path.dirname(ffmpeg))
+    return opts
+
 
 def _get_ffmpeg_path():
     """Return path to ffmpeg.exe if found next to executable or script; else None (yt-dlp uses PATH)."""
@@ -244,12 +279,12 @@ def _video_payload(info):
 
 class YouTubeDownloader:
     def __init__(self):
-        self.ydl_opts = {
+        self.ydl_opts = _ydl_runtime({
             'outtmpl': '%(title)s.%(ext)s',
             # Default to best available video+audio, GUI can still request specific qualities
             'format': 'bestvideo+bestaudio/best',
             'noplaylist': False,
-        }
+        })
         self.download_path = str(Path.home() / "Downloads")
         
     def set_download_path(self, path):
@@ -265,12 +300,12 @@ class YouTubeDownloader:
         """Get video or playlist information without downloading."""
         try:
             # Flat extract is fast for playlists / Mixes; formats come from the first entry.
-            opts = {
+            opts = _ydl_runtime({
                 'quiet': True,
                 'extract_flat': True,
                 'noplaylist': False,
                 'ignoreerrors': True,
-            }
+            })
             is_mix = _is_mix_url(url)
             if is_mix:
                 opts['playlistend'] = MIX_DEFAULT_LIMIT
@@ -309,7 +344,7 @@ class YouTubeDownloader:
                     if first_full is None and (video_id or webpage):
                         probe_url = webpage if str(webpage).startswith('http') else f"https://www.youtube.com/watch?v={video_id}"
                         try:
-                            with yt_dlp.YoutubeDL({'quiet': True, 'noplaylist': True}) as ydl2:
+                            with yt_dlp.YoutubeDL(_ydl_runtime({'quiet': True, 'noplaylist': True})) as ydl2:
                                 first_full = ydl2.extract_info(probe_url, download=False)
                         except Exception as probe_err:
                             _safe_print(f"Could not probe first playlist entry formats: {probe_err}")

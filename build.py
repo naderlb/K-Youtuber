@@ -23,6 +23,17 @@ def print_header():
     print()
 
 
+def _dotnet_exe():
+    """SDK used only while compiling. The published exe does not need .NET installed."""
+    found = shutil.which("dotnet")
+    if found:
+        return found
+    local = Path(os.environ.get("LOCALAPPDATA", "")) / "Microsoft" / "dotnet" / "dotnet.exe"
+    if local.is_file():
+        return str(local)
+    return None
+
+
 def check_dependencies():
     print("Checking Python dependencies...")
     if os.path.exists("requirements.txt"):
@@ -33,14 +44,14 @@ def check_dependencies():
         print("Python requirements installed")
     print()
 
-    print("Checking .NET SDK...")
-    try:
-        subprocess.run(["dotnet", "--version"], check=True, capture_output=True)
-        print(".NET SDK found")
-    except Exception as e:
-        print(f".NET SDK not found: {e}")
-        print("Install .NET 8+ SDK to build the GUI.")
+    print("Checking .NET SDK (compile step only)...")
+    dotnet = _dotnet_exe()
+    if not dotnet:
+        print(".NET SDK not found.")
+        print("The SDK is required to compile. The finished exe does not need .NET installed.")
         return False
+    subprocess.run([dotnet, "--version"], check=True)
+    print(f".NET SDK found: {dotnet}")
     print()
     return True
 
@@ -57,6 +68,8 @@ def build_backend():
         "--specpath", "build",
         "--hidden-import", "ffmpeg",
         "--hidden-import", "yt_dlp",
+        "--hidden-import", "yt_dlp_ejs",
+        "--collect-all", "yt_dlp_ejs",
         "--noconfirm",
         "backend.py",
     ]
@@ -75,19 +88,26 @@ def build_gui():
     if publish_dir.exists():
         shutil.rmtree(publish_dir)
 
+    dotnet = _dotnet_exe()
     cmd = [
-        "dotnet", "publish",
+        dotnet, "publish",
         "KartoshkaYoutuber.csproj",
         "-c", "Release",
         "-r", "win-x64",
         "--self-contained", "true",
         "/p:PublishSingleFile=true",
         "/p:IncludeNativeLibrariesForSelfExtract=true",
-        "/p:EnableCompressionInSingleFile=true",
+        "/p:EnableCompressionInSingleFile=false",
+        "/p:PublishTrimmed=false",
         "-o", str(publish_dir),
     ]
+    env = os.environ.copy()
+    dotnet_home = str(Path(dotnet).resolve().parent)
+    env["DOTNET_ROOT"] = dotnet_home
+    env["DOTNET_CLI_TELEMETRY_OPTOUT"] = "1"
+    env["PATH"] = dotnet_home + os.pathsep + env.get("PATH", "")
     try:
-        subprocess.run(cmd, check=True)
+        subprocess.run(cmd, check=True, env=env)
         exe = publish_dir / "kartoshka-youtuber.exe"
         if not exe.exists():
             # Fallback if assembly name differs
@@ -153,6 +173,7 @@ Created by NaderB - https://www.naderb.org
    - kartoshka-backend.exe   (downloader)
    - ffmpeg.exe              (optional but recommended for MP3 / merge)
 2. Run kartoshka-youtuber.exe
+   .NET does not need to be installed. Python does not need to be installed.
 3. Paste a YouTube URL (video or playlist / Mix)
 4. Click Get Info
 5. For playlists: select songs (or Select All), then Download Selected

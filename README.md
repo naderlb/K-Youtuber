@@ -120,7 +120,7 @@ This application uses a **two-part architecture** for maximum reliability:
 
 - **Update yt-dlp** — YouTube changes their API often; keep the library current:
   ```bash
-  pip install -U yt-dlp
+  pip install -U "yt-dlp[default]"
   ```
   Then rebuild with `python build.py` if you use the executables.
 - **Install [Deno](https://deno.com/)** — yt-dlp 2026.x works best with a JavaScript runtime for YouTube extraction
