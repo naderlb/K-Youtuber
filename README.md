@@ -6,7 +6,7 @@ A clean, modern YouTube downloader with an easy to use GUI interface.
 
 
 **Created by NaderB - https://www.naderb.org**  
-**Last updated: 2026-08-07**
+**Last updated: 2026-10-17**
 
 📦 **Download:** [Get the complete package (GUI + backend) at naderb.org/kartoshka](https://naderb.org/kartoshka)
 
@@ -148,7 +148,7 @@ This application uses a **two-part architecture** for maximum reliability:
 
 ## Technical Details
 
-- **Backend**: Python 3.x with yt-dlp (e.g. 2026.x)
+- **Backend**: Python 3.x with yt-dlp 2026.8.19 and yt-dlp-ejs 0.8.0
 - **Frontend**: C# WPF desktop app — **.NET 8**, Windows-only, self-contained single-file exe
 - **GUI project**: `KartoshkaYoutuber.csproj` (WPF, `net8.0-windows`)
 - **Packaging**: PyInstaller for backend; `dotnet publish -r win-x64 --self-contained` for GUI
@@ -242,6 +242,12 @@ SOFTWARE.
 
 ## Version History
 
+### 2026-10-17
+
+- Updated libraries: yt-dlp 2026.8.19, yt-dlp-ejs 0.8.0, PyInstaller 6.22.3, mutagen 1.48.1
+- YouTube requests use the Windows certificate store and Deno or Node for the player check
+- Self-contained window still runs without .NET installed
+
 ### v6.9.2 (2026-08-07)
 
 - **Playlist / Mix support** — load full track lists from playlist and `watch?v=…&list=…` URLs
@@ -259,7 +265,7 @@ SOFTWARE.
 
 - GUI rewritten in **C# WPF** (.NET 8); Python Tkinter GUI removed
 - Self-contained `kartoshka-youtuber.exe` (no .NET required on user machines)
-- Backend remains Python/yt-dlp; yt-dlp pinned to 2026.x
+- Backend remains Python/yt-dlp
 - Format combo and UI readability fixes
 
 ### v6.9

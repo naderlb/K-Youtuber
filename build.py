@@ -165,6 +165,7 @@ def create_release_package():
 A YouTube downloader with a modern WPF GUI.
 
 Created by NaderB - https://www.naderb.org
+Last updated: 2026-10-17
 
 ## How to Use
 

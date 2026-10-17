@@ -73,25 +73,16 @@ def test_backend():
     print("[SUCCESS] Backend tests passed!")
     return True
 
-def test_gui_import():
-    """Test if GUI can be imported"""
-    print("Testing GUI import...")
-    
-    try:
-        import tkinter
-        print("   [SUCCESS] tkinter available")
-        
-        # Try to import our GUI module
-        import gui
-        print("   [SUCCESS] GUI module imported successfully")
-        
-        return True
-    except ImportError as e:
-        print(f"   [ERROR] Import error: {e}")
+def test_gui_files():
+    """The window is a C# WPF project, not a Python module."""
+    print("Testing GUI project files...")
+    required = ("MainWindow.xaml", "MainWindow.xaml.cs", "KartoshkaYoutuber.csproj")
+    missing = [name for name in required if not os.path.exists(name)]
+    if missing:
+        print(f"   [ERROR] Missing GUI files: {', '.join(missing)}")
         return False
-    except Exception as e:
-        print(f"   [ERROR] Error importing GUI: {e}")
-        return False
+    print("   [SUCCESS] WPF GUI project files found")
+    return True
 
 def main():
     """Main test function"""
@@ -105,8 +96,8 @@ def main():
         print("[ERROR] backend.py not found!")
         return False
     
-    if not os.path.exists("gui.py"):
-        print("[ERROR] gui.py not found!")
+    if not os.path.exists("MainWindow.xaml"):
+        print("[ERROR] MainWindow.xaml not found!")
         return False
     
     print("[SUCCESS] All required files found")
@@ -119,9 +110,9 @@ def main():
     
     print()
     
-    # Test GUI import
-    if not test_gui_import():
-        print("[ERROR] GUI import tests failed!")
+    # Test GUI project files
+    if not test_gui_files():
+        print("[ERROR] GUI file tests failed!")
         return False
     
     print()
